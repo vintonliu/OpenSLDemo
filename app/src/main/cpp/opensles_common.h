@@ -17,6 +17,7 @@
 #define NULL    0
 #endif
 
+#define VOID_RETURN
 #define OPENSL_RETURN_ON_FAILURE(op, ret_val)   \
     do {                                        \
         SLresult err = (op);                    \
@@ -26,5 +27,8 @@
             return ret_val;                     \
         }                                       \
     } while(0)
+
+
+
 
 #endif //OPENSLDEMO_OPENSLES_COMMON_H

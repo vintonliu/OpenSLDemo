@@ -5,6 +5,7 @@
 #include "opensles_common.h"
 #include "cn_freedom_opensl_OpenSLManager.h"
 #include "opensles_output.h"
+#include "opensles_input.h"
 
 
 typedef struct AudioEngine
@@ -13,9 +14,7 @@ typedef struct AudioEngine
     SLEngineItf slEngineItf_;
 
     OpenSlesOutput* output_;
-
-    SLObjectItf slRecorderObj_;
-    SLRecordItf slRecorderItf_;
+    OpenSlesInput* input_;
 
     int fastPathSampleRate_;
     int fastPathFramesPerBuf_;
@@ -80,6 +79,8 @@ JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_deleteSlEngine
         slAudioEngine.slEngineObj_ = NULL;
         slAudioEngine.slEngineItf_ = NULL;
     }
+
+    return 0;
 }
 
 /*
@@ -90,7 +91,8 @@ JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_deleteSlEngine
 JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_createAudioPlayer
         (JNIEnv *, jobject)
 {
-
+    slAudioEngine.output_ = new OpenSlesOutput(slAudioEngine.slEngineItf_, 16000);
+    return 0;
 }
 
 /*
@@ -101,7 +103,11 @@ JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_createAudioPlayer
 JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_deleteAudioPlayer
         (JNIEnv *, jobject)
 {
-
+    if (slAudioEngine.output_ != NULL) {
+        delete slAudioEngine.output_;
+        slAudioEngine.output_ = NULL;
+    }
+    return 0;
 }
 
 /*
@@ -112,7 +118,11 @@ JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_deleteAudioPlayer
 JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_startPlayout
         (JNIEnv *, jobject)
 {
-
+    if (slAudioEngine.output_) {
+        slAudioEngine.output_->initPlayout();
+        slAudioEngine.output_->startPlayout();
+    }
+    return 0;
 }
 
 /*
@@ -123,7 +133,10 @@ JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_startPlayout
 JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_stopPlayout
         (JNIEnv *, jobject)
 {
-
+    if (slAudioEngine.output_) {
+        slAudioEngine.output_->stopPlayout();
+    }
+    return 0;
 }
 
 /*
@@ -134,7 +147,8 @@ JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_stopPlayout
 JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_createAudioRecorder
         (JNIEnv *, jobject)
 {
-
+    slAudioEngine.input_ = new OpenSlesInput(slAudioEngine.slEngineItf_, slAudioEngine.fastPathSampleRate_);
+    return 0;
 }
 
 /*
@@ -145,7 +159,11 @@ JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_createAudioRecorder
 JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_deleteAudioRecorder
         (JNIEnv *, jobject)
 {
-
+    if (slAudioEngine.input_ != NULL) {
+        delete slAudioEngine.input_;
+        slAudioEngine.input_ = NULL;
+    }
+    return 0;
 }
 
 /*
@@ -156,7 +174,11 @@ JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_deleteAudioRecorder
 JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_startRecording
         (JNIEnv *, jobject)
 {
-
+    if (slAudioEngine.input_ != NULL) {
+        slAudioEngine.input_->initRecording();
+        slAudioEngine.input_->startRecording();
+    }
+    return 0;
 }
 
 /*
@@ -167,5 +189,8 @@ JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_startRecording
 JNIEXPORT int JNICALL Java_cn_freedom_opensl_OpenSLManager_stopRecording
         (JNIEnv *, jobject)
 {
-
+    if (slAudioEngine.input_ != NULL) {
+        slAudioEngine.input_->stopRecording();
+    }
+    return 0;
 }

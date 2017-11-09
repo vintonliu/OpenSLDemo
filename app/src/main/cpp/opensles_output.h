@@ -5,11 +5,12 @@
 #ifndef OPENSLDEMO_AUDIOPLAYER_H
 #define OPENSLDEMO_AUDIOPLAYER_H
 
+#include <stdio.h>
 #include "opensles_common.h"
 
 class OpenSlesOutput {
 public:
-    OpenSlesOutput(SLEngineItf slEngineItf);
+    OpenSlesOutput(SLEngineItf slEngineItf, int sampleRate);
     ~OpenSlesOutput();
 
     int initPlayout();
@@ -38,15 +39,33 @@ private:
         // Note: The buffers in the OpenSL queue do not count towards the 10ms of
         // frames needed since OpenSL needs to have them ready for playout.
         kNum10MsToBuffer = 6,
+
+        kNumChannels = 2,
     };
 
-    int Init();
+    int createAudioPlayer();
+
+    int destoryAudioPlayer();
+
+    void enqueueAllBuffers();
+
+    static void playSimpleBufferQueueCallback(SLAndroidSimpleBufferQueueItf slPlayerSbqItf,
+                                       void *pContext);
+    void processSbqCallback(SLAndroidSimpleBufferQueueItf slPlayerSbqItf);
 private:
     SLEngineItf slEngineItf_;
     SLObjectItf slOutputMixObjItf_;
     SLObjectItf slPlayerObjItf_;
     SLPlayItf slPlayItf_;
     SLAndroidSimpleBufferQueueItf slPlayBufferQueueItf_;
+
+    int sampleRate_;
+    int channels_;
+    int bytesPer10ms_;
+    int samplesPer10ms_;
+    char* silenceBuf_;
+    char* playBuf_;
+    FILE* playFp_;
 };
 
 
